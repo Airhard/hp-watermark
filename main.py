@@ -1,3 +1,6 @@
-photo = Image.open('original_photo.jpg')
-watermark = Image.open('watermark.png')
+
+import Pillow
+
+photo = Image.open('Orig/DSC_10992.jpg')
+watermark = Image.open('watermark.jpg')
 photo.paste(watermark, (25, 25), watermark)
