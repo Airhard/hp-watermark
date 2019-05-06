@@ -1,6 +1,6 @@
 from PIL import Image as Image
 from PIL import ImageEnhance as ImageEnhance
-
+import os
 
 def reduce_opacity(im, opacity):
     """Returns an image with reduced opacity."""
@@ -34,20 +34,40 @@ def watermark(im, mark, position, opacity=1):
         w = int(mark.size[0] * ratio)
         h = int(mark.size[1] * ratio)
         mark = mark.resize((w, h))
-        layer.paste(mark, ((im.size[0] - w) / 2, (im.size[1] - h) / 2))
+        layer.paste(mark, (int((im.size[0] - w) / 2), int((im.size[1] - h) / 2)))
     else:
-        layer.paste(mark, position)
+        layer.paste(mark, [position[0], im.size[1] - (mark.size[1] +  position[1])])
     # composite the watermark with the layer
     return Image.composite(layer, im, layer)
 
 
-def test():
-    im = Image.open('DSC_10992.jpg')
-    mark = Image.open('watermark.jpg')
-    watermark(im, mark, 'tile', 0.5).show()
-    watermark(im, mark, 'scale', 1.0).show()
-    watermark(im, mark, (100, 100), 0.5).show()
+def test(img='DSC_10992.jpg', stimmung='hell'):
+    im = Image.open('orig_'+stimmung+'/' + img)
+    if stimmung == 'dunkel':
+        mark = Image.open('watermark_dunkel.png')
+    else:
+        mark = Image.open('watermark_hell.png')
+    #watermark(im, mark, 'tile', 0.5).show()
+    #watermark(im, mark, 'scale', 0.5).show()
+    #watermark(im, mark, (100, 100), 1).show()
+    #watermark(im, mark, (100, 100), 0.75).show()
+    watermark(im, mark, (100, 100), 1).save('marked/'+stimmung[0]+'_'+img[:-4]+'.png')
+    #watermark(im, mark, (100, 100), 0.75).save('marked/'+stimmung[0]+'_oc_75_'+img[:-4]+'.png')
+    #watermark(im, mark, (100, 100), 0.25).save('marked/'+stimmung[0]+'_oc_25_'+img[:-4]+'.png')
 
+def orig_hell_to_marked():
+    ls = os.listdir('orig_hell')
+    for foto in ls:
+        test(img=foto)
+
+def orig_dunkel_to_marked():
+    ls = os.listdir('orig_dunkel')
+    for foto in ls:
+        test(img=foto, stimmung='dunkel')
+
+def orig_to_marked():
+    orig_hell_to_marked()
+    orig_dunkel_to_marked()
 
 if __name__ == '__main__':
-    test()
+    orig_to_marked()
