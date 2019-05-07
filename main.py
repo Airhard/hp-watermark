@@ -1,6 +1,9 @@
 from PIL import Image as Image
 from PIL import ImageEnhance as ImageEnhance
 import os
+import tkinter as tk
+from tkinter import ttk
+
 
 def reduce_opacity(im, opacity):
     """Returns an image with reduced opacity."""
@@ -41,33 +44,79 @@ def watermark(im, mark, position, opacity=1):
     return Image.composite(layer, im, layer)
 
 
-def test(img='DSC_10992.jpg', stimmung='hell'):
+def convert(img='DSC_10992.jpg', stimmung='hell'):
     im = Image.open('orig_'+stimmung+'/' + img)
     if stimmung == 'dunkel':
         mark = Image.open('watermark_dunkel.png')
     else:
         mark = Image.open('watermark_hell.png')
-    #watermark(im, mark, 'tile', 0.5).show()
-    #watermark(im, mark, 'scale', 0.5).show()
-    #watermark(im, mark, (100, 100), 1).show()
-    #watermark(im, mark, (100, 100), 0.75).show()
+    print('start with: '+img)
     watermark(im, mark, (100, 100), 1).save('marked/'+stimmung[0]+'_'+img[:-4]+'.png')
+    print(img+' Done')
     #watermark(im, mark, (100, 100), 0.75).save('marked/'+stimmung[0]+'_oc_75_'+img[:-4]+'.png')
     #watermark(im, mark, (100, 100), 0.25).save('marked/'+stimmung[0]+'_oc_25_'+img[:-4]+'.png')
+
+
+def preview(img='DSC_10992.jpg', stimmung='hell'):
+    '''
+    Preview function
+    '''
+    im = Image.open('orig_'+stimmung+'/' + img)
+    if stimmung == 'dunkel':
+        mark = Image.open('watermark_dunkel.png')
+    else:
+        mark = Image.open('watermark_hell.png')
+    watermark(im, mark, 'tile', 0.5).show()
+    watermark(im, mark, 'scale', 0.5).show()
+    watermark(im, mark, (100, 100), 1).show()
+    watermark(im, mark, (100, 100), 0.75).show()
+
 
 def orig_hell_to_marked():
     ls = os.listdir('orig_hell')
     for foto in ls:
-        test(img=foto)
+        convert(img=foto)
+
 
 def orig_dunkel_to_marked():
     ls = os.listdir('orig_dunkel')
     for foto in ls:
-        test(img=foto, stimmung='dunkel')
+        convert(img=foto, stimmung='dunkel')
+
 
 def orig_to_marked():
     orig_hell_to_marked()
     orig_dunkel_to_marked()
 
+
+def main():
+    top = tk.Tk()
+    prev_btn = tk.Button(top, command=preview, text='Preview')
+    prev_btn.pack()
+    conv_btn = tk.Button(top, command=orig_to_marked, text='Convert')
+    conv_btn.pack()
+    sel_hell_var = tk.StringVar()
+
+    def preview_hell(*args):
+        '''
+        Preview function
+        '''
+        img = sel_hell.get()
+        im = Image.open('orig_hell/' + img)
+        mark = Image.open('watermark_hell.png')
+        mark_dark = Image.open('watermark_dunkel.png')
+        watermark(im, mark, 'tile', 0.5).show()
+        watermark(im, mark, 'scale', 0.5).show()
+        watermark(im, mark, (100, 100), 1).show()
+        watermark(im, mark_dark, (100, 100), 1).show()
+        watermark(im, mark, (100, 100), 0.75).show()
+    sel_hell = ttk.Combobox(top, textvariable=sel_hell_var)
+    sel_hell.bind('<<ComboboxSelected>>', preview_hell)
+    sel_hell['values'] = os.listdir('orig_hell')
+    sel_hell.pack()
+    # Code to add widgets will go here...
+    top.mainloop()
+
+
 if __name__ == '__main__':
-    orig_to_marked()
+    main()
