@@ -90,12 +90,20 @@ def orig_to_marked():
 
 
 def main():
-    top = tk.Tk()
+    root = tk.Tk()
+    root.title('HP-Logo Klatscher')
+    top = ttk.Frame(root)
+    top['padding'] = (15, 10)
+    top.pack()
     prev_btn = tk.Button(top, command=preview, text='Preview')
     prev_btn.pack()
-    conv_btn = tk.Button(top, command=orig_to_marked, text='Convert')
+    conv_btn = tk.Button(top, command=orig_to_marked, text='Convert all')
     conv_btn.pack()
+###
+#    Heller selector
+###
     sel_hell_var = tk.StringVar()
+    sel_hell_var.set('Helle Fotos dunkles Logo')
 
     def preview_hell(*args):
         '''
@@ -114,8 +122,31 @@ def main():
     sel_hell.bind('<<ComboboxSelected>>', preview_hell)
     sel_hell['values'] = os.listdir('orig_hell')
     sel_hell.pack()
+###
+#    Dunkel selector
+###
+    sel_dark_var = tk.StringVar()
+    sel_dark_var.set('Dunkle Fotos helles Logo')
+
+    def preview_dark(*args):
+        '''
+        Preview function
+        '''
+        img = sel_dark.get()
+        im = Image.open('orig_dunkel/' + img)
+        mark = Image.open('watermark_dunkel.png')
+        mark_hell = Image.open('watermark_hell.png')
+        watermark(im, mark, 'tile', 0.5).show()
+        watermark(im, mark, 'scale', 0.5).show()
+        watermark(im, mark, (100, 100), 1).show()
+        watermark(im, mark_hell, (100, 100), 1).show()
+        watermark(im, mark, (100, 100), 0.75).show()
+    sel_dark = ttk.Combobox(top, textvariable=sel_dark_var)
+    sel_dark.bind('<<ComboboxSelected>>', preview_dark)
+    sel_dark['values'] = os.listdir('orig_dunkel')
+    sel_dark.pack()
     # Code to add widgets will go here...
-    top.mainloop()
+    root.mainloop()
 
 
 if __name__ == '__main__':
